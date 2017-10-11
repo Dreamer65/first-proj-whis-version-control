@@ -21,6 +21,7 @@ public class LevelFile extends File {
     private boolean existsError() throws IOException {
         if(!this.exists()){
             System.out.println("Файла не существует");
+            return false;
         }
         return true;
     }
@@ -71,13 +72,30 @@ public class LevelFile extends File {
         StringBuilder stringBuilder = new StringBuilder();
         write(String.valueOf(id) + "\n");
 
+
         do {
-            stringBuilder.append(newRoom.getQuantity());
+            stringBuilder.append(room.getQuantity());
             stringBuilder.append("\n");
-            stringBuilder.append(newRoom.getText());
+            stringBuilder.append(room.getText());
             stringBuilder.append("\n\n");
+            room = room.getBackDoorNext();
+        }while (room != null);
+        while (newRoom != null){
+            for (int i = 0; i < newRoom.getQuantity(); i++){
+                if(newRoom.go(i) != null){
+                    stringBuilder.append(newRoom.go(i).getId());
+                    stringBuilder.append(" ");
+                }
+                else {
+                    stringBuilder.append("f");
+                    stringBuilder.append(" ");
+                }
+
+            }
+            stringBuilder.append("\n");
             newRoom = newRoom.getBackDoorNext();
-        }while (newRoom != null);
+        }
+
 
         update(stringBuilder.toString());
     }
@@ -85,6 +103,7 @@ public class LevelFile extends File {
     public NewRoom loadLevel() throws IOException {
         if(read() == null){
             System.out.println("Файл не найден или пуст. Создана новая карта");
+            id = 0;
             NewRoom newRoom = new NewRoom((byte) 0, 2);
             return newRoom;
         }
@@ -93,18 +112,53 @@ public class LevelFile extends File {
 
         id = Byte.parseByte(in.readLine());
         in.readLine();
-        NewRoom newRoom = new NewRoom((byte) 0, Integer.parseInt(in.readLine()));
-        newRoom.setText(in.readLine());
+        NewRoom room = new NewRoom((byte) 0, Integer.parseInt(in.readLine()));
+        room.setText(in.readLine());
         in.readLine();
 
         for(byte i = 1; i < id; i++){
-            newRoom.createNew(i, Integer.parseInt(in.readLine()));
-            newRoom = newRoom.getBackDoorNext();
-            newRoom.setText(in.readLine());
+            room.createNew(i, Integer.parseInt(in.readLine()));
+            room = room.getBackDoorNext();
+            room.setText(in.readLine());
             in.readLine();
         }
 
-        return newRoom;
+        while (room.getBackDoorPriveous() != null){
+            room = room.getBackDoorPriveous();
+        }
+
+/////////////////////////////////////
+        /*
+        Этот фрагмент отвечает за чтение связей
+        он работает не коректно
+         */
+        String string;
+        NewRoom newRoom = room;
+        NewRoom first = room;
+
+        for(int i = 0; i < id; i++){
+            string = in.readLine();
+            char stringArray;
+            byte a;
+            for(int j = 0; j < room.getQuantity()*2; j+=2){
+                    //System.out.print(stringArray[j]);
+                stringArray = string.toCharArray()[j];
+                if(stringArray != 'f'){
+                    a = Byte.parseByte(String.valueOf(stringArray));
+                    while (newRoom.getId() != a){
+                        newRoom = newRoom.getBackDoorNext();
+                    }
+                        room.setTonel(newRoom, j/2);
+                }
+
+            }
+            room = room.getBackDoorNext();
+            System.out.println();
+            newRoom = first;
+        }
+
+/////////////////////////////////////////
+        return first;
 
     }
 

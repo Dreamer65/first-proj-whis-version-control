@@ -30,8 +30,8 @@ public class Main {
             inputStr = in.next();
             switch (inputStr){
                 case "add" : {
-                    map = goTo(map, (byte) (id - 1));
-                    map.createNew(id++, quantity);
+                    map = goTo(map, (byte) (id));
+                    map.createNew(++id, quantity);
                     System.out.println("Создана комната № " + map.getBackDoorNext().getId());
                     break;
                 }
@@ -59,7 +59,7 @@ public class Main {
                 case "allRooms" : {
                     map = first;
                     System.out.println("Комната " + map.getId() + "c " + map.getQuantity() + " дверьми");
-                    while (map.getId() != id - 1){
+                    while (map.getBackDoorNext() != null){
                         map = map.getBackDoorNext();
                         System.out.println("Комната " + map.getId() + "c " + map.getQuantity() + " дверьми");
                     }
@@ -102,9 +102,22 @@ public class Main {
                     break;
                 }
 
+                case "help" : {
+                    System.out.println("add");
+                    System.out.println("nextBD");
+                    System.out.println("priveousBD");
+                    System.out.println("allRooms");
+                    System.out.println("goto");
+                    System.out.println("conect");
+                    System.out.println("around");
+                    System.out.println("text");
+                    System.out.println("print");
+                    break;
+                }
+
                 case "0" : break admin;
 
-                default : System.out.println("Неверная команда");
+                default : System.out.println("Неверная команда"); break;
             }
         }
 
@@ -154,19 +167,17 @@ public class Main {
     }
 
     public static NewRoom goTo(NewRoom room, byte id){
-        {
-            if(room.getId() <= id) {
-                while (room.getId() != id) {
-                    room = room.getBackDoorNext();
-                }
+        if(room.getId() <= id) {
+            while (room.getId() != id) {
+                room = room.getBackDoorNext();
             }
-            else{
-                while (room.getId() != id) {
-                    room = room.getBackDoorPriveous();
-                }
-            }
-            System.out.println("Вы в комнате " + room.getId());
         }
+        else{
+            while (room.getId() != id) {
+                    room = room.getBackDoorPriveous();
+            }
+        }
+        System.out.println("Вы в комнате " + room.getId());
 
         return room;
     }
